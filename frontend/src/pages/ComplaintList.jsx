@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getComplaints,
   updateComplaint,
@@ -7,6 +8,7 @@ import {
 } from "../api";
 import ComplaintCard from "../components/ComplaintCard";
 import LoadingSpinner from "../components/LoadingSpinner";
+import PageHero from "../components/PageHero";
 
 const CATEGORIES = [
   "Water Supply",
@@ -18,6 +20,7 @@ const CATEGORIES = [
 ];
 
 function ComplaintList() {
+  const navigate = useNavigate();
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -89,12 +92,17 @@ function ComplaintList() {
     });
   };
 
+  const handleAiAnalyze = (id) => {
+    navigate("/ai-analysis", { state: { complaintId: id } });
+  };
+
   return (
     <div className="page complaints-page">
-      <header className="page-header">
-        <h1>Complaint Tracking</h1>
-        <p>View, filter, search, and update complaint status</p>
-      </header>
+      <PageHero
+        badge="Tracking Module"
+        title="Complaint Tracking Hub"
+        subtitle="Filter by category, search by location, update status, and run per-case AI analysis."
+      />
 
       <div className="toolbar glass-card">
         <form onSubmit={handleSearch} className="search-form">
@@ -203,6 +211,7 @@ function ComplaintList() {
                 complaint={c}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onAnalyze={handleAiAnalyze}
               />
             ))}
           </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getComplaints,
   addComplaint,
@@ -6,9 +7,11 @@ import {
   deleteComplaint,
   searchComplaints,
 } from "../api";
+import { getApiError } from "../utils/getApiError";
 import StatCard from "../components/StatCard";
 import ComplaintCard from "../components/ComplaintCard";
 import LoadingSpinner from "../components/LoadingSpinner";
+import PageHero from "../components/PageHero";
 
 const emptyForm = {
   name: "",
@@ -30,6 +33,8 @@ const CATEGORIES = [
 ];
 
 function Dashboard() {
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
   const [complaints, setComplaints] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
@@ -90,7 +95,7 @@ function Dashboard() {
       resetForm();
       fetchComplaints();
     } catch (err) {
-      setError(err.response?.data?.message || "Operation failed");
+      setError(getApiError(err, "Operation failed"));
     } finally {
       setSubmitting(false);
     }
@@ -139,12 +144,17 @@ function Dashboard() {
     }
   };
 
+  const handleAiAnalyze = (id) => {
+    navigate("/ai-analysis", { state: { complaintId: id } });
+  };
+
   return (
     <div className="page dashboard-page">
-      <header className="page-header">
-        <h1>Complaint Dashboard</h1>
-        <p>Register, track, and manage civic complaints</p>
-      </header>
+      <PageHero
+        badge={`Welcome, ${user.name || "Officer"}`}
+        title="Complaint Command Center"
+        subtitle="Register grievances, monitor status, and route cases to AI intelligence."
+      />
 
       <section className="stats-grid">
         <StatCard icon="📊" label="Total Complaints" value={stats.total} accent="accent-blue" />
@@ -280,6 +290,7 @@ function Dashboard() {
                   complaint={c}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
+                  onAnalyze={handleAiAnalyze}
                 />
               ))}
             </div>
